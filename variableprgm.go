@@ -9,7 +9,8 @@ func main(){
 	middlename :="Bob"
 	lastname := "Smith"
 
-	fmt.Println("middlename:", middlename)
+	fmt.Println("Full name:", name, middlename, lastname)
+	Printname()
 
 
 	fmt.Println("Integer:", a)
