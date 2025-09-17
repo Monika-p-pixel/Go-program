@@ -11,6 +11,7 @@ func main() {
 		tuesday=2
 		wednesday=3
         		thursday int =4					
-	}
+	}}
+	
 
 	name:="John"
