@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Cart - Color Fun</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <h2>Your Cart</h2>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/worksheets">Worksheets</a>
+        <a href="/add-worksheet">Add Worksheet</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    </div>
+    <div id="cart" class="cart-list"></div>
+    <button id="checkoutBtn" style="display:block;margin:24px auto 0 auto;">Checkout</button>
+    <script>
+    async function loadCart() {
+        const token = localStorage.getItem('jwt');
+        if (!token) {
+            document.getElementById('cart').textContent = 'Please login to view your cart.';
+            return;
+        }
+        const res = await fetch('/api/cart', {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (res.ok && data.success && Array.isArray(data.cart)) {
+            if (data.cart.length === 0) {
+                document.getElementById('cart').textContent = 'Your cart is empty.';
+                document.getElementById('checkoutBtn').style.display = 'none';
+                return;
+            }
+            let total = 0;
+            let html = '<ul style="list-style:none;padding:0;">';
+            data.cart.forEach(ws => {
+                total += ws.price || 0;
+                html += `<li style="background:#f6d365;margin-bottom:10px;padding:10px;border-radius:8px;">
+                    <a href="/worksheet/${ws.id}" style="color:#333;text-decoration:none;font-weight:bold;">
+                        ${ws.title}
+                    </a> - ${ws.difficulty} (${ws.pages} pages) <span style="color:#388e3c;font-weight:bold;">₹${ws.price || 'N/A'}</span>
+                    <button onclick="removeFromCart(${ws.id})" style="margin-left:12px;padding:4px 10px;border-radius:5px;border:none;background:#d9534f;color:#fff;cursor:pointer;">Remove</button>
+                </li>`;
+            });
+            html += '</ul>';
+            html += `<div style="text-align:right;font-size:18px;font-weight:bold;margin-top:12px;">Total: ₹${total.toFixed(2)}</div>`;
+            document.getElementById('cart').innerHTML = html;
+            document.getElementById('checkoutBtn').style.display = 'block';
+        } else {
+            document.getElementById('cart').textContent = data.error || 'Failed to load cart.';
+        }
+    }
+    async function removeFromCart(id) {
+        const token = localStorage.getItem('jwt');
+        if (!token) {
+            alert('Please login to remove from cart.');
+            window.location.href = '/login';
+            return;
+        }
+        const res = await fetch('/api/cart', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ worksheet_id: id })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            alert('Worksheet removed from cart!');
+            loadCart();
+        } else {
+            alert(data.error || 'Failed to remove from cart.');
+        }
+    }
+    document.getElementById('checkoutBtn').onclick = async function() {
+        const token = localStorage.getItem('jwt');
+        if (!token) {
+            alert('Please login to checkout.');
+            window.location.href = '/login';
+            return;
+        }
+        // Get total price from cart
+        let total = 0;
+        const resCart = await fetch('/api/cart', {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const dataCart = await resCart.json();
+        if (resCart.ok && dataCart.success && Array.isArray(dataCart.cart)) {
+            dataCart.cart.forEach(ws => { total += ws.price || 0; });
+        }
+        const res = await fetch('/api/cart/checkout', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            alert(`Checkout successful! Thank you for your purchase.\nTotal paid: ₹${total.toFixed(2)}`);
+            loadCart();
+        } else {
+            alert(data.error || 'Checkout failed.');
+        }
+    };
+    loadCart();
+    </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Worksheet Details - Color Fun</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <h2>Worksheet Details</h2>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/worksheets">Worksheets</a>
+        <a href="/cart">Cart</a>
+        <a href="/add-worksheet">Add Worksheet</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    </div>
+    <div id="worksheet" class="worksheet-card"></div>
+    <script>
+    function getWorksheetId() {
+        const match = window.location.pathname.match(/\/worksheet\/(\d+)/);
+        return match ? match[1] : null;
+    }
+    async function loadWorksheet() {
+        const id = getWorksheetId();
+        if (!id) {
+            document.getElementById('worksheet').textContent = 'Worksheet not found.';
+            return;
+        }
+        const res = await fetch(`/api/worksheets/${id}`);
+        if (!res.ok) {
+            document.getElementById('worksheet').textContent = 'Worksheet not found.';
+            return;
+        }
+        const ws = await res.json();
+        let html = `<div style="background:#f6d365;padding:20px;border-radius:12px;max-width:400px;margin:auto;">
+            <h3>${ws.title}</h3>
+            <p><strong>Description:</strong> ${ws.description || 'No description.'}</p>
+            <p><strong>Difficulty:</strong> ${ws.difficulty}</p>
+            <p><strong>Pages:</strong> ${ws.pages}</p>
+            <p><strong>Price:</strong> $${ws.price || 'N/A'}</p>
+            <p><strong>Active:</strong> ${ws.is_active ? 'Yes' : 'No'}</p>
+        </div>`;
+        document.getElementById('worksheet').innerHTML = html;
+    }
+    loadWorksheet();
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Color Fun</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <h2>Welcome to Your Dashboard</h2>
+    <div class="nav-links">
+        <a href="/worksheets">Worksheets</a>
+        <a href="/cart">Cart</a>
+        <a href="/add-worksheet">Add Worksheet</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    </div>
+    <div id="userInfo" class="dashboard-card"></div>
+    <h3>Your Worksheets</h3>
+    <div id="worksheets" class="dashboard-list"></div>
+    <button id="logoutBtn">Logout</button>
+    <script>
+    async function loadDashboard() {
+        const token = localStorage.getItem('jwt');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+        const res = await fetch('/api/dashboard', {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.status === 401) {
+            localStorage.removeItem('jwt');
+            window.location.href = '/login';
+            return;
+        }
+        const data = await res.json();
+        if (data.user) {
+            document.getElementById('userInfo').innerHTML = `<strong>Name:</strong> ${data.user.name}<br><strong>Email:</strong> ${data.user.email}<br><strong>Role:</strong> ${data.user.role}`;
+        }
+        if (data.worksheets) {
+            let html = '<ul style="list-style:none;padding:0;">';
+            data.worksheets.forEach(ws => {
+                html += `<li style="background:#f6d365;margin-bottom:10px;padding:10px;border-radius:8px;">
+                    <a href="/worksheet/${ws.id}" style="color:#333;text-decoration:none;font-weight:bold;">
+                        ${ws.title}
+                    </a> - ${ws.difficulty} (${ws.pages} pages)
+                </li>`;
+            });
+            html += '</ul>';
+            document.getElementById('worksheets').innerHTML = html;
+        }
+    }
+    document.getElementById('logoutBtn').onclick = function() {
+        localStorage.removeItem('jwt');
+        window.location.href = '/login';
+    };
+    loadDashboard();
+    </script>
+</body>
+</html>

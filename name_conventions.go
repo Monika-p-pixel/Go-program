@@ -1,10 +1,12 @@
-package main
+
 import "fmt"
+
 type employee struct {
 	firstname string
 	lastname  string
-	age	   int
+	age       int
 }
+
 func main() {
 	const Maxrities = 5
 	var employeeid int = 1001
@@ -16,6 +18,5 @@ func main() {
 	fmt.Println("Employee Name:", emp.firstname, emp.lastname)
 	fmt.Println("Employee Age:", emp.age)
 
-	
 }
 
