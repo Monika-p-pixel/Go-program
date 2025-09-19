@@ -28,5 +28,16 @@ func main() {
 	maxInt = maxInt + 1
 	fmt.Println(maxInt)
 
+	var umaxint uint64 = 18446744073709551615
+	fmt.Println(umaxint)
+
+	umaxint = umaxint + 1
+	fmt.Println(umaxint)
+
+	var smallint float64 = 	1.0e-323
+	fmt.Println(smallint)
+	smallint = smallint/MaxFloat64
+	fmt.Println(smallint)
+
 
 }	
