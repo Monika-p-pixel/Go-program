@@ -36,7 +36,7 @@ func main() {
 
 	var smallint float64 = 	1.0e-323
 	fmt.Println(smallint)
-	smallint = smallint/MaxFloat64
+	smallint = smallint/maxFloat64
 	fmt.Println(smallint)
 
 
