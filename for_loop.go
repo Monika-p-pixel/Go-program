@@ -14,15 +14,22 @@ func main() {
 	//for index, value := range numbers {
 		//fmt.Printf("Index: %d, Value: %d\n", index, value)
 	//}
-	for i=1;i<=10;i++{
-		if i%2==0{
+	for i:=1;i<=10;i++{
+
+
+		if i%2==0 {
 			continue
 		}
-		fmt.Println("odd number:",i)
+
+		fmt.Println("odd number:", i)
 		if i == 5 {
 			break
 
+
+	}   
 }
-	}
 }
+
+
+
 
