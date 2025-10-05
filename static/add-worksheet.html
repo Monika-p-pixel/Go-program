@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Worksheet - Color Fun</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <h2>Add New Worksheet</h2>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/worksheets">Worksheets</a>
+        <a href="/cart">Cart</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    </div>
+    <form id="addWorksheetForm">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required><br>
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description"><br>
+        <label for="difficulty">Difficulty:</label>
+        <select id="difficulty" name="difficulty" required>
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+        </select><br>
+        <label for="pages">Pages:</label>
+        <input type="number" id="pages" name="pages" min="1" required><br>
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" min="0" step="0.01"><br>
+    <label for="image_url">Image URL:</label>
+    <input type="text" id="image_url" name="image_url" placeholder="Paste URL or upload below"><br>
+    <label for="image_file">Or upload image:</label>
+    <input type="file" id="image_file" name="image_file" accept="image/*"><br>
+        <label for="is_active">Active:</label>
+        <input type="checkbox" id="is_active" name="is_active" checked><br>
+        <button type="submit">Add Worksheet</button>
+    </form>
+    <div id="addWorksheetMsg" style="color:#d9534f;text-align:center;margin-top:10px;"></div>
+    <a href="/worksheets" style="display:block;margin-top:30px;text-align:center;">Back to Worksheets</a>
+    <script>
+    document.getElementById('image_file').addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('image', file);
+        const res = await fetch('/api/upload-image', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.url) {
+            document.getElementById('image_url').value = data.url;
+            document.getElementById('addWorksheetMsg').style.color = '#28a745';
+            document.getElementById('addWorksheetMsg').textContent = 'Image uploaded!';
+        } else {
+            document.getElementById('addWorksheetMsg').style.color = '#d9534f';
+            document.getElementById('addWorksheetMsg').textContent = data.error || 'Image upload failed.';
+        }
+    });
+
+    document.getElementById('addWorksheetForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const worksheet = {
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            difficulty: document.getElementById('difficulty').value,
+            pages: parseInt(document.getElementById('pages').value),
+            price: parseFloat(document.getElementById('price').value) || 0,
+            image_url: document.getElementById('image_url').value,
+            is_active: document.getElementById('is_active').checked
+        };
+        const res = await fetch('/api/worksheets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(worksheet)
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            document.getElementById('addWorksheetMsg').style.color = '#28a745';
+            document.getElementById('addWorksheetMsg').textContent = 'Worksheet added successfully!';
+            document.getElementById('addWorksheetForm').reset();
+        } else {
+            document.getElementById('addWorksheetMsg').style.color = '#d9534f';
+            document.getElementById('addWorksheetMsg').textContent = data.message || 'Failed to add worksheet.';
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Worksheets - Color Fun</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <h2>All Worksheets</h2>
+    <div class="nav-links">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/cart">Cart</a>
+        <a href="/add-worksheet">Add Worksheet</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    </div>
+    <div id="worksheets" class="worksheet-list"></div>
+    <script>
+    async function loadWorksheets() {
+        const res = await fetch('/api/worksheets');
+        const data = await res.json();
+        if (Array.isArray(data)) {
+            // Group worksheets by normalized title
+            const grouped = {};
+            const titleMap = {};
+            data.forEach(ws => {
+                const normTitle = ws.title.trim().toLowerCase();
+                if (!grouped[normTitle]) {
+                    grouped[normTitle] = [];
+                    titleMap[normTitle] = ws.title.trim();
+                }
+                grouped[normTitle].push(ws);
+            });
+            let html = '';
+            Object.keys(grouped).forEach(normTitle => {
+                const displayTitle = titleMap[normTitle];
+                html += `<section style="background:#f6d365;margin-bottom:18px;padding:16px;border-radius:12px;">
+                    <h3 style="margin-top:0;">${displayTitle}</h3>
+                    <div style="display:flex;flex-wrap:wrap;gap:16px;">`;
+                grouped[normTitle].forEach(ws => {
+                    if (ws.image_url) {
+                        html += `<div style="text-align:center;">
+                            <img src="${ws.image_url}" alt="${ws.title}" style="max-width:120px;max-height:120px;display:block;margin-bottom:8px;border-radius:6px;" onerror="this.onerror=null;this.src='/default-worksheet.png';">
+                            <a href="/worksheet/${ws.id}" style="color:#333;text-decoration:none;font-weight:bold;">${ws.title}</a><br>
+                            <span style="font-size:13px;">${ws.difficulty} (${ws.pages} pages)</span><br>
+                            <span style="font-size:14px;color:#388e3c;font-weight:bold;">₹${ws.price || 'N/A'}</span><br>
+                            <button onclick="window.print()" style="margin:4px 2px 0 2px;padding:4px 10px;border-radius:5px;border:none;background:#ffb74d;color:#333;cursor:pointer;">Print</button>
+                            <a href="${ws.image_url}" download style="margin:4px 2px 0 2px;padding:4px 10px;border-radius:5px;border:none;background:#81c784;color:#fff;text-decoration:none;display:inline-block;">Download</a>
+                            <button onclick="addToCart(${ws.id})" style="margin:4px 2px 0 2px;padding:4px 10px;border-radius:5px;border:none;background:#64b5f6;color:#fff;cursor:pointer;">Add to Cart</button>
+                        </div>`;
+                    }
+                });
+                html += `</div></section>`;
+            });
+            document.getElementById('worksheets').innerHTML = html;
+        } else {
+            document.getElementById('worksheets').textContent = 'No worksheets found.';
+        }
+    }
+    async function addToCart(id) {
+        const token = localStorage.getItem('jwt');
+        if (!token) {
+            alert('Please login to add to cart.');
+            window.location.href = '/login';
+            return;
+        }
+        const res = await fetch('/api/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ worksheet_id: id })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            alert('Worksheet added to cart!');
+        } else {
+            alert(data.error || 'Failed to add to cart.');
+        }
+    }
+    loadWorksheets();
+    </script>
+</body>
+</html>
