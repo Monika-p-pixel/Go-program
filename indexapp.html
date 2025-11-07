@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coloring Sheets Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .upload-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        input[type="email"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .sheets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .sheet-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .sheet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .sheet-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .sheet-name {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .sheet-info {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .sheet-price {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .sheet-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .btn-download {
+            background: #28a745;
+        }
+
+        .btn-download:hover {
+            background: #218838;
+        }
+
+        .btn-print {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-print:hover {
+            background: #e0a800;
+        }
+
+        .btn-cart {
+            background: #ff6b6b;
+        }
+
+        .btn-cart:hover {
+            background: #ee5a52;
+        }
+
+        .cart-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff6b6b;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .cart-badge:hover {
+            transform: scale(1.1);
+        }
+
+        .cart-items {
+            margin-top: 20px;
+        }
+
+        .cart-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-total {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 60px 20px;
+            font-size: 1.2em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+            
+            .sheets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-badge {
+                top: 10px;
+                right: 10px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cart-badge" onclick="switchTab('cart')">
+        🛒 Cart (<span id="cartCount">0</span>)
+    </div>
+
+    <div class="container">
+        <h1>🎨 Coloring Sheets Store</h1>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('upload')">Upload Sheet</button>
+            <button class="tab" onclick="switchTab('browse')">Browse Sheets</button>
+            <button class="tab" onclick="switchTab('cart')">Cart</button>
+            <button class="tab" onclick="switchTab('checkout')">Checkout</button>
+        </div>
+
+        <!-- Upload Tab -->
+        <div id="upload" class="tab-content active">
+            <div class="upload-form">
+                <h2 style="margin-bottom: 20px;">Add New Coloring Sheet</h2>
+                <div class="success-message" id="uploadSuccess">
+                    ✓ Coloring sheet added successfully!
+                </div>
+                <div class="error-message" id="uploadError"></div>
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label>Sheet Name:</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Quantity:</label>
+                            <input type="number" name="quantity" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Price (₹):</label>
+                            <input type="number" name="price" step="0.01" min="0" value="0" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Image:</label>
+                        <input type="file" name="image" accept="image/*" required>
+                    </div>
+                    <button type="submit" id="uploadBtn">Add Coloring Sheet</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Browse Tab -->
+        <div id="browse" class="tab-content">
+            <h2 style="margin-bottom: 20px;">Available Coloring Sheets</h2>
+            <div id="browseLoading" class="loading">Loading sheets...</div>
+            <div class="sheets-grid" id="sheetsGrid"></div>
+        </div>
+
+        <!-- Cart Tab -->
+        <div id="cart" class="tab-content">
+            <h2 style="margin-bottom: 20px;">Shopping Cart</h2>
+            <div class="cart-items" id="cartItems"></div>
+            <div class="cart-total" id="cartTotal">Total: ₹0.00</div>
+            <button onclick="switchTab('checkout')" style="margin-top: 20px; width: 100%;" id="checkoutBtn">
+                Proceed to Checkout
+            </button>
+        </div>
+
+        <!-- Checkout Tab -->
+        <div id="checkout" class="tab-content">
+            <h2 style="margin-bottom: 20px;">Shipping Information</h2>
+            <div class="success-message" id="orderSuccess"></div>
+            <div class="error-message" id="orderError"></div>
+            <form id="checkoutForm" class="upload-form">
+                <div class="row">
+                    <div class="form-group">
+                        <label>Full Name:</label>
+                        <input type="text" name="customer_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" name="email" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Phone:</label>
+                    <input type="tel" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Address:</label>
+                    <textarea name="address" required></textarea>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label>City:</label>
+                        <input type="text" name="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label>State:</label>
+                        <input type="text" name="state" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Pincode:</label>
+                    <input type="text" name="pincode" pattern="[0-9]{6}" placeholder="e.g., 560001" required>
+                </div>
+                <div class="cart-total" style="text-align: left; margin-bottom: 20px;">
+                    Order Total: <span id="checkoutTotal">₹0.00</span>
+                </div>
+                <button type="submit" style="width: 100%;" id="orderBtn">Place Order</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+        let sheets = [];
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+        // Initialize
+        updateCartCount();
+        loadSheets();
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Find and activate the corresponding tab button
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'browse') {
+                loadSheets();
+            } else if (tabName === 'cart') {
+                renderCart();
+            } else if (tabName === 'checkout') {
+                updateCheckoutTotal();
+            }
+        }
+
+        // Upload Form Handler
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/sheets/add`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    document.getElementById('uploadSuccess').style.display = 'block';
+                    document.getElementById('uploadError').style.display = 'none';
+                    e.target.reset();
+                    setTimeout(() => {
+                        document.getElementById('uploadSuccess').style.display = 'none';
+                    }, 3000);
+                    loadSheets();
+                } else {
+                    throw new Error('Upload failed');
+                }
+            } catch (error) {
+                document.getElementById('uploadError').textContent = '❌ Error uploading sheet. Please try again.';
+                document.getElementById('uploadError').style.display = 'block';
+                document.getElementById('uploadSuccess').style.display = 'none';
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Add Coloring Sheet';
+            }
+        });
+
+        async function loadSheets() {
+            const grid = document.getElementById('sheetsGrid');
+            const loading = document.getElementById('browseLoading');
+            
+            loading.style.display = 'block';
+            grid.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/sheets`);
+                sheets = await response.json();
+                loading.style.display = 'none';
+                renderSheets();
+            } catch (error) {
+                loading.innerHTML = '<div class="error-message" style="display:block;">❌ Error loading sheets. Please refresh the page.</div>';
+                console.error('Error loading sheets:', error);
+            }
+        }
+
+        function renderSheets() {
+            const grid = document.getElementById('sheetsGrid');
+            
+            if (sheets.length === 0) {
+                grid.innerHTML = '<div class="empty-state">No coloring sheets available yet. Upload one to get started!</div>';
+                return;
+            }
+            
+            grid.innerHTML = sheets.map(sheet => `
+                <div class="sheet-card">
+                    <img src="data:image/png;base64,${sheet.image}" class="sheet-image" alt="${sheet.name}">
+                    <div class="sheet-name">${sheet.name}</div>
+                    <div class="sheet-info">Available: ${sheet.quantity} sheets</div>
+                    <div class="sheet-price">₹${sheet.price.toFixed(2)}</div>
+                    <div class="sheet-actions">
+                        <button class="btn-small btn-download" onclick="downloadSheet(${sheet.id})">
+                            📥 Download
+                        </button>
+                        <button class="btn-small btn-print" onclick="printSheet(${sheet.id})">
+                            🖨️ Print
+                        </button>
+                        <button class="btn-small btn-cart" onclick="addToCart(${sheet.id})">
+                            🛒 Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function downloadSheet(id) {
+            window.open(`${API_URL}/api/sheets/download/${id}`, '_blank');
+        }
+
+        function printSheet(id) {
+            const sheet = sheets.find(s => s.id === id);
+            if (sheet) {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Print ${sheet.name}</title>
+                            <style>
+                                body { margin: 0; padding: 20px; text-align: center; }
+                                img { max-width: 100%; height: auto; }
+                                h1 { font-family: Arial, sans-serif; }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>${sheet.name}</h1>
+                            <img src="data:image/png;base64,${sheet.image}" onload="window.print()">
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+            }
+        }
+
+        function addToCart(id) {
+            const sheet = sheets.find(s => s.id === id);
+            if (!sheet) return;
+            
+            const existingItem = cart.find(item => item.sheet_id === id);
+            if (existingItem) {
+                if (existingItem.quantity < sheet.quantity) {
+                    existingItem.quantity++;
+                } else {
+                    alert('Cannot add more. Maximum quantity reached!');
+                    return;
+                }
+            } else {
+                cart.push({ sheet_id: id, quantity: 1 });
+            }
+            
+            saveCart();
+            updateCartCount();
+            
+            // Show feedback
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Added!';
+            btn.style.background = '#28a745';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+            }, 1000);
+        }
+
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        function updateCartCount() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cartCount').textContent = totalItems;
+        }
+
+        function renderCart() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            
+            if (cart.length === 0) {
+                cartItemsDiv.innerHTML = '<div class="empty-state">Your cart is empty<br>🛒<br>Browse sheets and add some!</div>';
+                document.getElementById('cartTotal').textContent = 'Total: ₹0.00';
+                checkoutBtn.disabled = true;
+                return;
+            }
+            
+            checkoutBtn.disabled = false;
+            let total = 0;
+            cartItemsDiv.innerHTML = cart.map(item => {
+                const sheet = sheets.find(s => s.id === item.sheet_id);
+                if (!sheet) return '';
+                
+                const subtotal = sheet.price * item.quantity;
+                total += subtotal;
+                
+                return `
+                    <div class="cart-item">
+                        <div>
+                            <strong>${sheet.name}</strong><br>
+                            <small>₹${sheet.price.toFixed(2)} × ${item.quantity} = ₹${subtotal.toFixed(2)}</small>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button class="btn-small" onclick="updateQuantity(${item.sheet_id}, -1)" style="background:#ffc107;color:#333;">-</button>
+                            <span style="min-width: 30px; text-align: center; font-weight: bold;">${item.quantity}</span>
+                            <button class="btn-small" onclick="updateQuantity(${item.sheet_id}, 1)" style="background:#28a745;">+</button>
+                            <button class="btn-small" style="background:#dc3545;" onclick="removeFromCart(${item.sheet_id})">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('cartTotal').textContent = `Total: ₹${total.toFixed(2)}`;
+        }
+
+        function updateQuantity(sheetId, change) {
+            const item = cart.find(i => i.sheet_id === sheetId);
+            const sheet = sheets.find(s => s.id === sheetId);
+            
+            if (item && sheet) {
+                const newQuantity = item.quantity + change;
+                if (newQuantity > 0 && newQuantity <= sheet.quantity) {
+                    item.quantity = newQuantity;
+                    saveCart();
+                    updateCartCount();
+                    renderCart();
+                } else if (newQuantity > sheet.quantity) {
+                    alert('Cannot add more. Maximum quantity reached!');
+                } else {
+                    removeFromCart(sheetId);
+                }
+            }
+        }
+
+        function removeFromCart(sheetId) {
+            cart = cart.filter(item => item.sheet_id !== sheetId);
+            saveCart();
+            updateCartCount();
+            renderCart();
+        }
+
+        function updateCheckoutTotal() {
+            let total = 0;
+            cart.forEach(item => {
+                const sheet = sheets.find(s => s.id === item.sheet_id);
+                if (sheet) {
+                    total += sheet.price * item.quantity;
+                }
+            });
+            document.getElementById('checkoutTotal').textContent = `₹${total.toFixed(2)}`;
+        }
+
+        // Checkout Form Handler
+        document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const orderBtn = document.getElementById('orderBtn');
+            
+            let total = 0;
+            cart.forEach(item => {
+                const sheet = sheets.find(s => s.id === item.sheet_id);
+                if (sheet) {
+                    total += sheet.price * item.quantity;
+                }
+            });
+            
+            const orderData = {
+                items: cart,
+                customer_name: formData.get('customer_name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                address: formData.get('address'),
+                city: formData.get('city'),
+                state: formData.get('state'),
+                pincode: formData.get('pincode'),
+                total_amount: total
+            };
+            
+            orderBtn.disabled = true;
+            orderBtn.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/order`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('orderSuccess').textContent = 
+                        `✓ Order placed successfully! Order ID: ${result.order_id}. You will receive a confirmation email shortly.`;
+                    document.getElementById('orderSuccess').style.display = 'block';
+                    document.getElementById('orderError').style.display = 'none';
+                    e.target.reset();
+                    cart = [];
+                    saveCart();
+                    updateCartCount();
+                    
+                    setTimeout(() => {
+                        document.getElementById('orderSuccess').style.display = 'none';
+                        switchTab('browse');
+                    }, 5000);
+                } else {
+                    throw new Error('Order failed');
+                }
+            } catch (error) {
+                document.getElementById('orderError').textContent = '❌ Error placing order. Please try again.';
+                document.getElementById('orderError').style.display = 'block';
+                document.getElementById('orderSuccess').style.display = 'none';
+            } finally {
+                orderBtn.disabled = false;
+                orderBtn.textContent = 'Place Order';
+            }
+        });
+    </script>
+</body>
+</html>
